@@ -1,0 +1,106 @@
+# AGENTS.md — Layer 1 Map: {{ PROJECT_NAME }}
+
+> The root routing map for this repository. Every folder has a local `CONTEXT.md` that governs that
+> space. **Read the local `CONTEXT.md` first; come back here only when it does not answer you.**
+
+## Project Overview
+
+**{{ PROJECT_NAME }}**: {{ PROJECT_DESCRIPTION }}
+
+---
+
+## Workspaces
+
+| Folder | Holds | Core Constraint |
+|---|---|---|
+| `/planning` | Specs, architecture, decisions | Task logs must be created under `/planning/tasks/` — never at root. |
+| `/src` | Pure computational engines and core math | Pure functions and stateless engines. Must never import from `/ops`. |
+| `/data` | Empirical recordings and stable outputs | **Never modify raw data — read only.** Stable outputs go to processed folders; intermediates go to `current_output/`. |
+| `/docs` | Documentation, literature, changelog | Architecture blueprints, guides, and historical changelog. |
+| `/ops` | Pipeline orchestration, runners, and reports | A script here may read `/src` configs, but must not re-run an engine or recompute statistics. Strict one-way dependency: `/ops` → `/src`. |
+
+**Output style.** Answers in this repo are written BLUF — answer first, plain words, no
+preamble. The rules live in `.claude/output-styles/bluf.md` and are activated for Claude Code by
+`"outputStyle": "BLUF"` in `.claude/settings.json`. Agents that do not load output styles should
+read that file and follow it anyway.
+
+---
+
+## Routing
+
+| Task / Domain | Target Folder | Read First | Skills |
+|---|---|---|---|
+| **[ORCHESTRATOR & LIFECYCLE] Proactive skill routing & subagent bundling** — mandatory session-start entry point; classifies task context, enforces process/domain skill priority, and injects skill constraints into subagents | Global / Root | [.agents/skills/skills-orchestrator/SKILL.md](.agents/skills/skills-orchestrator/SKILL.md) | `skills-orchestrator` |
+| **[WORKFLOWS & QUALITY GATE] Brainstorming, TDD, debugging & subagent execution** — disciplined plan-first engineering, test-driven implementation, root-cause investigation, and subagent review | Global / Root | [docs/CUSTOM_SKILLS.md](docs/CUSTOM_SKILLS.md) | `brainstorming`, `test-driven-development`, `systematic-debugging`, `executing-plans`, `subagent-driven-development`, `verification-before-completion` |
+| **[EXPERT COUNCIL & MULTI-AGENT DEBATE] Multidisciplinary debate & consensus** — spawns 3–4 expert subagents across specified or inferred domains to debate and resolve complex architectural, scientific, or methodological questions | Global / Root | [.agents/skills/experts_council/SKILL.md](.agents/skills/experts_council/SKILL.md) | `experts_council`, `skills-orchestrator` |
+| **[CORE LOGIC & ENGINES] Pure algorithmic implementation** — stateless math, modeling, and data transformations | `/src` | [src/CONTEXT.md](src/CONTEXT.md) | `test-driven-development`, `transparent-data-masker` |
+| **[ORCHESTRATION & RUNNERS] Pipeline execution & batch reporting** — pipeline orchestration, parameter sweeps, evaluation runs | `/ops` | [ops/CONTEXT.md](ops/CONTEXT.md) | `statistical-batch-orchestrator`, `datavis` |
+| **[DATA GOVERNANCE] Raw input handling & dataset caching** — immutable raw data and stable processed data tables | `/data` | [data/CONTEXT.md](data/CONTEXT.md) | `transparent-data-masker` |
+| **[PLANNING & SPECS] Feature specifications & task tracking** — formal specs, task tracking, and literature grounding | `/planning` | [planning/CONTEXT.md](planning/CONTEXT.md) | `writing-plans`, `strict-agent-pipeline` |
+| **[MAINTENANCE & CHECKPOINT] Codebase maintenance & phase wrap-up** — ruff formatting, tree sync, graph update, test verification | Root / `/ops` | [docs/CHANGELOG.md](docs/CHANGELOG.md) | `icm-maintenance`, `project-checkpoint`, `verification-before-completion` |
+
+Skills are catalogued in [`docs/CUSTOM_SKILLS.md`](docs/CUSTOM_SKILLS.md) and live in
+`.agents/skills/`, which is tracked, so they travel with a clone. `.claude/skills/` is a junction
+onto that folder — Claude Code only auto-loads that path. **After a fresh clone, recreate it:**
+- **Windows:** `cmd /c mklink /J .claude\skills .agents\skills`
+- **Linux/macOS:** `ln -s ../.agents/skills .claude/skills`
+
+> [!IMPORTANT]
+> **Skills Orchestration & Selection Authority (`skills-route`):** How skills are selected based on high-level intent (code creation, debugging, data filtering, population statistics, visualization, literature review, checkpoints) and bundled for subagents is defined in [`.agents/skills/skills-route/SKILL.md`](.agents/skills/skills-route/SKILL.md).
+
+---
+
+## NEVER
+
+Hard constraints. Violating one is a defect, not a style choice.
+
+1. **Never hide an analytical parameter.** Every seed, alpha, cutoff, smoothing sigma and
+   threshold is exposed in a config file or a function signature — never buried in a utility.
+2. **Never assume.** Ask. If you are unsure, say so. Be unbiased by what is claimed — go to the foundations and report errors.
+3. **Never modify raw data.** Read from `/data` only.
+4. **Never skip the 9-step pipeline** in [`CODE_PIPELINE.md`](CODE_PIPELINE.md) for any modification.
+5. **Never integrate untested math.** Core data-processing and statistical logic requires a passing
+   headless unit test before it goes in.
+6. **Never introduce an undocumented third-party library** without explicit validation.
+7. **Never define a quantity twice — point at the authority instead.** A threshold, geometry, or constant
+   is declared in exactly one place, and every other file imports or references that place.
+8. **Never state a configurable choice as a fact.** If how significance is decided, which trace is
+   primary, or which model runs is set by a config constant, name the constant and its default.
+9. **Never take ad-hoc, un-orchestrated actions or write code without consulting skills.** Always invoke
+   the relevant skill via `skills-orchestrator` before any response, plan, or implementation action.
+10. **Never run `git add .`, `git add -A`, or `git add -u`.** Always stage files explicitly by path (`git add path/to/file`). Run `git status` prior to commit to confirm zero data arrays, caches, or untracked outputs are staged.
+
+---
+
+## DEFAULTS
+
+How to work unless told otherwise.
+
+- **Start every session with `skills-orchestrator`:** Immediately after reading `AGENTS.md` on turn 1, invoke
+  `skills-orchestrator` to evaluate task context and declare the 1-line pre-flight tag:
+  `[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <env-name>]`
+  before taking action or responding.
+- **Explicit Environment execution:** Always run Python scripts, unit tests, and pipeline runners using the explicit environment (e.g. `conda run -n {{ CONDA_ENV }} python ...` or `uv run python ...`).
+- **Package skills for subagents:** When dispatching subagents via `invoke_subagent`, the parent agent MUST
+  explicitly bundle the required role instructions and constraints into the subagent's prompt per
+  [`.agents/skills/skills-route/SKILL.md`](.agents/skills/skills-route/SKILL.md).
+- **Use simple language. Keep output short.** Explain in plain words, step by step, and write as
+  little as possible to make the point. Do not use technical vocabulary unless asked. NO
+  STREAM OF CONSCIOUSNESS. GIVE OUTPUT STRICTLY ONLY WHEN A DECISION IS NEEDED OR THERE IS A 
+  PROBLEM THAT REQUIRES DEVIATION FROM THE PLAN.
+- **80% planning, 20% execution.** Plan, then execute.
+- **Search for elegance, do not over-engineer.** The simplest well-reasoned solution in few lines
+  wins. Code must stay easy to modify.
+- **Log the session in a task-description `.md` under [`planning/tasks/`](planning/tasks/)** —
+  question → plan → task list, extended as work continues. Name it `task_<arm>.md`.
+  **Never write one to the repository root.**
+- **Close a phase with `/project-checkpoint`**, which archives the task log into
+  `docs/CHANGELOG.md` and moves the completed task markdown from `planning/tasks/` into `planning/tasks/archive/`.
+
+---
+
+## Conventions
+
+- `snake_case` for modules, functions, variables. `PascalCase` for classes.
+- **New skill** → write it in `.agents/skills/`, register it in
+  [`docs/CUSTOM_SKILLS.md`](docs/CUSTOM_SKILLS.md), classify it in [`skills-route`](.agents/skills/skills-route/SKILL.md), and add it to the Routing table above if folder-bound.

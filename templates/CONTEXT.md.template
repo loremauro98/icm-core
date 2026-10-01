@@ -1,0 +1,35 @@
+# Context: {{ WORKSPACE_NAME }}
+
+> Room Contract for `/{{ WORKSPACE_NAME }}`. Governs what is allowed and expected in this folder.
+> Consult `../AGENTS.md` for project-wide routing and rules.
+
+## 1. Role & Purpose
+{{ WORKSPACE_PURPOSE }}
+
+---
+
+## 2. Allowed Inputs
+{{ WORKSPACE_INPUTS }}
+
+---
+
+## 3. Core Process & Execution
+{{ WORKSPACE_PROCESS }}
+
+---
+
+## 4. Expected Outputs
+{{ WORKSPACE_OUTPUTS }}
+
+---
+
+## 5. Local Invariants & NEVER Rules
+{% for constraint in WORKSPACE_CONSTRAINTS %}
+- **{{ constraint }}**
+{% endfor %}
+
+---
+
+## 6. General Guidelines
+All changes in this workspace must follow the 9-step engineering pipeline defined in [../CODE_PIPELINE.md](../CODE_PIPELINE.md).
+Tests governing logic here belong in `tests/`.

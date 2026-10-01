@@ -1,0 +1,92 @@
+# Custom AI Skills Registry: {{ PROJECT_NAME }}
+
+This document catalogues the bespoke AI agent skills available in this repository.
+`.agents/skills/` in this repository is the **source of truth**; it is tracked in git, so skills
+travel with a clone.
+
+## Where these skills live
+
+| Path | Role | In git? | Read by |
+| :--- | :--- | :--- | :--- |
+| `.agents/skills/` | **Source of truth.** Edit here. | **Yes** — tracked in git | Gemini, Antigravity, generic agents |
+| `.claude/skills/` | Junction / symlink onto `.agents/skills/` | No (gitignored) | Claude Code (auto-loads this path) |
+
+Recreating the junction after a fresh clone:
+- **Windows:** `cmd /c mklink /J .claude\skills .agents\skills`
+- **Linux/macOS:** `ln -s ../.agents/skills .claude/skills`
+
+---
+
+## Active Skills Catalog
+
+### 1. `skills-orchestrator`
+**Location:** `.agents/skills/skills-orchestrator/`  
+**Purpose:** Mandatory session-start entry point and subagent packaging framework.  
+**Behavior:** Classifies task context, resolves process and domain skill priorities, prevents un-orchestrated ad-hoc coding, and bundles role-based skill instructions into subagents via `skills-route`.
+
+### 2. `skills-route`
+**Location:** `.agents/skills/skills-route/`  
+**Purpose:** High-level intent router and subagent bundling authority.  
+**Behavior:** Classifies requests into 7 functional categories to determine the active skill stack and configure subagent prompts.
+
+### 3. `brainstorming`
+**Location:** `.agents/skills/brainstorming/`  
+**Purpose:** Explores user intent, requirements, and design before creative work.  
+**Behavior:** Enforces a hard gate preventing premature coding before requirements are aligned.
+
+### 4. `test-driven-development`
+**Location:** `.agents/skills/test-driven-development/`  
+**Purpose:** Enforces strict test-first development (red → green → refactor).  
+**Behavior:** Never write implementation code before a failing unit test exists and passes headless.
+
+### 5. `systematic-debugging`
+**Location:** `.agents/skills/systematic-debugging/`  
+**Purpose:** Disciplined 4-phase root cause investigation.  
+**Behavior:** Investigates failures methodically without speculative guesswork.
+
+### 6. `writing-plans`
+**Location:** `.agents/skills/writing-plans/`  
+**Purpose:** Generates fine-grained, dependency-ordered implementation plans optimized for subagent execution.
+
+### 7. `executing-plans`
+**Location:** `.agents/skills/executing-plans/`  
+**Purpose:** Step-by-step plan execution with hard verification gates per task.
+
+### 8. `subagent-driven-development`
+**Location:** `.agents/skills/subagent-driven-development/`  
+**Purpose:** Autonomous subagent orchestration where each task is implemented by a subagent and peer-reviewed.
+
+### 9. `verification-before-completion`
+**Location:** `.agents/skills/verification-before-completion/`  
+**Purpose:** Enforces evidence-based observation before claiming work is complete.
+
+### 10. `experts_council`
+**Location:** `.agents/skills/experts_council/`  
+**Purpose:** Convenes a panel of 3–4 specialized subagents to debate, scrutinize, and resolve complex architectural, scientific, or engineering problems.  
+**Behavior:** Dynamically assigns expert subfields, announces debate start in chat, and runs a structured 2-round cross-examination before synthesizing a verdict.
+
+### 11. `project-checkpoint`
+**Location:** `.agents/skills/project-checkpoint/`  
+**Purpose:** Standardizes the process of wrapping up a phase of work.  
+**Behavior:** Automates testing, context synchronization, changelog archival, and clean git commits.
+
+### 12. `icm-maintenance`
+**Location:** `.agents/skills/icm-maintenance/`  
+**Purpose:** Codebase linting, formatting, and directory tree synchronization.
+
+### 13. `transparent-data-masker`
+**Location:** `.agents/skills/transparent-data-masker/`  
+**Purpose:** Guarantees transparency and reproducibility in data filtering and masking.  
+**Behavior:** Tracks and logs exact drop counts per criterion before applying combined masks.
+
+### 14. `statistical-batch-orchestrator`
+**Location:** `.agents/skills/statistical-batch-orchestrator/`  
+**Purpose:** Scales single-instance models to batch / population orchestrators with robust null models.
+
+### 15. `master-presenter`
+**Location:** `.agents/skills/master-presenter/`  
+**Purpose:** Converts findings into a walkthrough PDF presentation deck and narrative script.
+
+### 16. `flavio`
+**Location:** `.agents/skills/flavio/`  
+**Purpose:** Hyper-critical, naive peer reviewer auditing reports and presentation figures.
