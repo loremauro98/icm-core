@@ -1,8 +1,8 @@
-# ICM Core — Interpretable Context Methodology & Skills OS
+# ICM Core — Interpretable Context Methodology & Skills workflow
 
 > A turnkey, agentic operating system that pairs **Spatial Context Architecture (ICM)**
 > with **Executive Skills Routing** for Python and multi-language projects.
-> Works out of the box with Claude Code, Gemini CLI, Antigravity, and Cursor.
+> Works out of the box for any harness
 
 ## Quickstart
 
