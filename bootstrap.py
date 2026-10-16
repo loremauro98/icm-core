@@ -344,7 +344,11 @@ def package_distribution(
     """Builds a complete, standalone distribution package in export_dir ready to push to GitHub."""
     export_dir = export_dir.resolve()
     if export_dir.exists():
-        shutil.rmtree(export_dir)
+        def _remove_readonly(func, path, _):
+            import stat
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        shutil.rmtree(export_dir, onerror=_remove_readonly)
     export_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Copy templates
@@ -353,6 +357,8 @@ def package_distribution(
 
     # 2. Copy portable skills
     source_skills = source_root / ".agents" / "skills"
+    if not source_skills.exists():
+        source_skills = Path(__file__).parent / "skills"
     dest_skills = export_dir / "skills"
     dest_skills.mkdir(parents=True, exist_ok=True)
 
