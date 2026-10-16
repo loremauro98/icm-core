@@ -3,7 +3,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-dist_dir = Path(__file__).parent.resolve()
+dist_dir = Path(__file__).parent.parent.resolve()
 print(f"Testing isolated install from: {dist_dir}")
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -35,8 +35,12 @@ with tempfile.TemporaryDirectory() as tmp:
     ]
     res_doc = subprocess.run(cmd_doc, capture_output=True, text=True)
     print(res_doc.stdout)
-    if "10/10" not in res_doc.stdout:
+    if "11/11" not in res_doc.stdout:
         print("Doctor failed!")
         sys.exit(1)
+
+    # Verify rules deployed
+    rule_file = tpath / ".agents" / "rules" / "context-health.md"
+    assert rule_file.exists(), f"Rule file {rule_file} was not deployed!"
 
 print("SUCCESS: Standalone package verified working in 100% isolation.")

@@ -30,9 +30,9 @@ flowchart TD
 ---
 
 ### Category 1: Feature Creation, Refactoring & Code Modification
-- **Trigger:** Adding new functionality, refactoring modules, modifying analytical logic.
-- **Skill Stack:** [`brainstorming`](../brainstorming/SKILL.md) $\rightarrow$ [`writing-plans`](../writing-plans/SKILL.md) $\rightarrow$ [`test-driven-development`](../test-driven-development/SKILL.md) $\rightarrow$ [`verification-before-completion`](../verification-before-completion/SKILL.md).
-- **Hard Rule:** Red/green TDD is mandatory. Never write implementation code before a failing unit test exists and passes headless.
+- **Trigger:** Adding new functionality, refactoring modules, modifying analytical logic, evaluating complex architectural choices, or executing long-running autonomous runs (`/goal`).
+- **Skill Stack:** [`brainstorming`](../brainstorming/SKILL.md) (± [`experts_council`](../experts_council/SKILL.md) for complex architectural/domain debate) $\rightarrow$ [`writing-plans`](../writing-plans/SKILL.md) $\rightarrow$ [`test-driven-development`](../test-driven-development/SKILL.md) $\rightarrow$ [`verification-before-completion`](../verification-before-completion/SKILL.md) (Autonomous orchestrator: [`goal`](../../goal/SKILL.md)).
+- **Hard Rule:** Red/green TDD is mandatory. Never write implementation code before a failing unit test exists and passes headless. For `/goal` runs, adhere to the 5 pillars of unattended execution and emit the completion token only upon full verified success.
 
 ### Category 2: Bug Investigation & Failure Diagnosis
 - **Trigger:** Unexpected outputs, test failures, regressions, performance drops, or crashes.
@@ -65,6 +65,7 @@ flowchart TD
 ### Category 6: Scientific Literature & External Biological Databases
 - **Trigger:** Reviewing published methods, querying gene/protein data, looking up chemical ligands, or fetching structures.
 - **Skill Stack:**
+  - Multidisciplinary expert debate: [`experts_council`](../experts_council/SKILL.md)
   - Comprehensive literature review: [`literature-search`](../literature-search/SKILL.md)
   - Validating statistical claims against papers: [`scientific-bullshit-detector`](../scientific-bullshit-detector/SKILL.md)
   - Literature-to-algorithm translation: [`literature-to-algorithm`](../literature-to-algorithm/SKILL.md)
@@ -119,6 +120,14 @@ Review the PDF presentation or figure report page-by-page. Demand raw single-uni
 ```markdown
 You are a Literature Research Subagent. You MUST adhere to:
 1. literature-search: Query multiple academic databases, cross-verify DOIs, and deliver a structured thematic synthesis (never study-by-study summaries).
+```
+
+### Role: Council Expert (Category 1 & 6 — `experts_council`)
+```markdown
+You are an expert member of the Expert Council on: [Problem Statement].
+Your Assigned Expertise Domain: [Expert Subfield].
+You MUST adhere to:
+1. experts_council: Analyze strictly through your assigned domain lens, state foundational assumptions and failure modes in Round 1, and conduct rigorous, adversarial cross-examination of peer proposals in Round 2.
 ```
 
 ### Role: Documentation / Maintenance (Category 7)

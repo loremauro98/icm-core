@@ -33,6 +33,9 @@ except ImportError:
         "icm-maintenance",
         "strict-agent-pipeline",
         "verification-before-completion",
+        "goal",
+        "lookback",
+        "icm-init",
         "brainstorming",
         "writing-plans",
         "executing-plans",
@@ -46,6 +49,8 @@ except ImportError:
         "using-git-worktrees",
         "writing-skills",
         "robustness-audit",
+        "diagnosing-superpowers",
+        "module-migrator",
         "transparent-data-masker",
         "statistical-batch-orchestrator",
         "jupyter-pickle-rescuer",
@@ -61,6 +66,7 @@ except ImportError:
         "fable-domain",
         "prompter",
         "graphify",
+        "graphify-agentic-extraction",
     ]
     SCIENCE_EXTENSION_SKILLS = [
         "literature-search",
@@ -300,10 +306,32 @@ def scaffold_project(
     # 9. Establish Cross-Agent Junction
     junction_ok = setup_skills_junction(target_dir)
 
+    # 10. Deploy Rules Bundle
+    rules_source = None
+    curr = Path(__file__).parent.resolve()
+    candidates_rules = [
+        curr / "rules",
+        templates_dir.parent / "rules",
+        templates_dir / "rules",
+    ]
+    for c in candidates_rules:
+        if c.exists() and c.is_dir():
+            rules_source = c
+            break
+
+    rules_copied = 0
+    if rules_source and rules_source.exists():
+        dest_rules_dir = target_dir / ".agents" / "rules"
+        dest_rules_dir.mkdir(parents=True, exist_ok=True)
+        for r_file in rules_source.glob("*.md"):
+            shutil.copy2(r_file, dest_rules_dir / r_file.name)
+            rules_copied += 1
+
     return {
         "target_dir": str(target_dir),
         "project_name": project_name,
         "skills_copied": len(copied_skills),
+        "rules_copied": rules_copied,
         "junction_created": junction_ok,
     }
 
@@ -333,6 +361,16 @@ def package_distribution(
         src = source_skills / skill_name
         if src.exists() and src.is_dir():
             shutil.copytree(src, dest_skills / skill_name)
+
+    # 2b. Copy rules
+    source_rules = source_root / ".agents" / "rules"
+    if not source_rules.exists():
+        source_rules = Path(__file__).parent / "rules"
+    dest_rules = export_dir / "rules"
+    if source_rules.exists() and source_rules.is_dir():
+        dest_rules.mkdir(parents=True, exist_ok=True)
+        for r_file in source_rules.glob("*.md"):
+            shutil.copy2(r_file, dest_rules / r_file.name)
 
     # 3. Copy bootstrap script itself
     shutil.copy2(__file__, export_dir / "bootstrap.py")
@@ -403,6 +441,7 @@ def check_doctor(target_dir: Path) -> Dict[str, bool]:
         "planning_context": (target_dir / "planning" / "CONTEXT.md").exists(),
         "docs_context": (target_dir / "docs" / "CONTEXT.md").exists(),
         "agents_skills_dir": (target_dir / ".agents" / "skills").is_dir(),
+        "agents_rules_dir": (target_dir / ".agents" / "rules").is_dir(),
         "claude_skills_link": (target_dir / ".claude" / "skills").exists(),
         "output_style_bluf": (
             target_dir / ".claude" / "output-styles" / "bluf.md"
@@ -493,6 +532,7 @@ def cli():
         )
         print(f"[SUCCESS] Initialized ICM Project '{p_name}' at {res['target_dir']}")
         print(f" - Skills deployed: {res['skills_copied']}")
+        print(f" - Rules deployed: {res.get('rules_copied', 0)}")
         print(f" - Cross-agent junction created: {res['junction_created']}")
 
     elif args.command == "export":

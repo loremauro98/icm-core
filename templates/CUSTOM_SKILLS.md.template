@@ -90,3 +90,41 @@ Recreating the junction after a fresh clone:
 ### 16. `flavio`
 **Location:** `.agents/skills/flavio/`  
 **Purpose:** Hyper-critical, naive peer reviewer auditing reports and presentation figures.
+
+### 17. `goal`
+**Location:** `.agents/skills/goal/`  
+**Purpose:** Autonomous, long-running goal execution protocol for overnight or complex tasks.  
+**Behavior:** Enforces 5 pillars of unattended execution: non-intervention, granular tracking, systematic loop recovery, empirical verification, and explicit termination tokens (`<!-- GOAL_COMPLETE -->`).
+
+### 18. `lookback`
+**Location:** `.agents/skills/lookback/`  
+**Purpose:** Distills knowledge, steps, and edge-case fixes from a completed chat session into a reusable Agent Skill.
+
+### 19. `icm-init`
+**Location:** `.agents/skills/icm-init/`  
+**Purpose:** Scaffolds new projects with the Interpretable Context Methodology architecture.
+
+### 20. `graphify`
+**Location:** `.agents/skills/graphify/`  
+**Purpose:** Navigates structural code knowledge graphs via CLI / MCP queries before reading raw files.
+
+### 21. `graphify-agentic-extraction`
+**Location:** `.agents/skills/graphify-agentic-extraction/`  
+**Purpose:** Automates background semantic knowledge graph extraction to bypass API rate limits.
+
+### 22. `diagnosing-superpowers`
+**Location:** `.agents/skills/diagnosing-superpowers/`  
+**Purpose:** Diagnoses failed or degraded agent sessions, tool stumbles, and harness inefficiencies.
+
+### 23. `module-migrator`
+**Location:** `.agents/skills/module-migrator/`  
+**Purpose:** Safely migrates code files into modular subproject directories with synchronized contexts.
+
+### 24. `robustness-audit`
+**Location:** `.agents/skills/robustness-audit/`  
+**Purpose:** Verifies headless unit test existence and enforces that zero hardcoded analytical cutoffs exist.
+
+### 25. `datavis`
+**Location:** `.agents/skills/datavis/`  
+**Purpose:** Generates publication-quality figures, charts, and plots adhering to color, percentage, and readability standards.
+

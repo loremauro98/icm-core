@@ -18,6 +18,9 @@ CORE_PORTABLE_SKILLS: List[str] = [
     "icm-maintenance",
     "strict-agent-pipeline",
     "verification-before-completion",
+    "goal",
+    "lookback",
+    "icm-init",
     # Engineering & Quality
     "brainstorming",
     "writing-plans",
@@ -32,6 +35,8 @@ CORE_PORTABLE_SKILLS: List[str] = [
     "using-git-worktrees",
     "writing-skills",
     "robustness-audit",
+    "diagnosing-superpowers",
+    "module-migrator",
     # Data & Analytics Discipline
     "transparent-data-masker",
     "statistical-batch-orchestrator",
@@ -49,6 +54,7 @@ CORE_PORTABLE_SKILLS: List[str] = [
     "fable-domain",
     "prompter",
     "graphify",
+    "graphify-agentic-extraction",
 ]
 
 # Scientific & Research extensions (can be toggled with --profile=science)

@@ -31,13 +31,13 @@ read that file and follow it anyway.
 | Task / Domain | Target Folder | Read First | Skills |
 |---|---|---|---|
 | **[ORCHESTRATOR & LIFECYCLE] Proactive skill routing & subagent bundling** — mandatory session-start entry point; classifies task context, enforces process/domain skill priority, and injects skill constraints into subagents | Global / Root | [.agents/skills/skills-orchestrator/SKILL.md](.agents/skills/skills-orchestrator/SKILL.md) | `skills-orchestrator` |
-| **[WORKFLOWS & QUALITY GATE] Brainstorming, TDD, debugging & subagent execution** — disciplined plan-first engineering, test-driven implementation, root-cause investigation, and subagent review | Global / Root | [docs/CUSTOM_SKILLS.md](docs/CUSTOM_SKILLS.md) | `brainstorming`, `test-driven-development`, `systematic-debugging`, `executing-plans`, `subagent-driven-development`, `verification-before-completion` |
+| **[WORKFLOWS & QUALITY GATE] Brainstorming, TDD, debugging, subagents & autonomous goal** — disciplined plan-first engineering, test-driven implementation, root-cause investigation, subagent review, and autonomous overnight goal execution | Global / Root | [docs/CUSTOM_SKILLS.md](docs/CUSTOM_SKILLS.md) | `brainstorming`, `test-driven-development`, `systematic-debugging`, `executing-plans`, `subagent-driven-development`, `verification-before-completion`, `goal` |
 | **[EXPERT COUNCIL & MULTI-AGENT DEBATE] Multidisciplinary debate & consensus** — spawns 3–4 expert subagents across specified or inferred domains to debate and resolve complex architectural, scientific, or methodological questions | Global / Root | [.agents/skills/experts_council/SKILL.md](.agents/skills/experts_council/SKILL.md) | `experts_council`, `skills-orchestrator` |
 | **[CORE LOGIC & ENGINES] Pure algorithmic implementation** — stateless math, modeling, and data transformations | `/src` | [src/CONTEXT.md](src/CONTEXT.md) | `test-driven-development`, `transparent-data-masker` |
 | **[ORCHESTRATION & RUNNERS] Pipeline execution & batch reporting** — pipeline orchestration, parameter sweeps, evaluation runs | `/ops` | [ops/CONTEXT.md](ops/CONTEXT.md) | `statistical-batch-orchestrator`, `datavis` |
 | **[DATA GOVERNANCE] Raw input handling & dataset caching** — immutable raw data and stable processed data tables | `/data` | [data/CONTEXT.md](data/CONTEXT.md) | `transparent-data-masker` |
 | **[PLANNING & SPECS] Feature specifications & task tracking** — formal specs, task tracking, and literature grounding | `/planning` | [planning/CONTEXT.md](planning/CONTEXT.md) | `writing-plans`, `strict-agent-pipeline` |
-| **[MAINTENANCE & CHECKPOINT] Codebase maintenance & phase wrap-up** — ruff formatting, tree sync, graph update, test verification | Root / `/ops` | [docs/CHANGELOG.md](docs/CHANGELOG.md) | `icm-maintenance`, `project-checkpoint`, `verification-before-completion` |
+| **[MAINTENANCE, DISTILLATION & CHECKPOINT] Codebase maintenance, skill distillation & phase wrap-up** — ruff formatting, tree sync, graph update, test verification, session distillation into reusable skills | Root / `/ops` | [docs/CHANGELOG.md](docs/CHANGELOG.md) | `icm-maintenance`, `project-checkpoint`, `verification-before-completion`, `lookback` |
 
 Skills are catalogued in [`docs/CUSTOM_SKILLS.md`](docs/CUSTOM_SKILLS.md) and live in
 `.agents/skills/`, which is tracked, so they travel with a clone. `.claude/skills/` is a junction
@@ -69,6 +69,7 @@ Hard constraints. Violating one is a defect, not a style choice.
 9. **Never take ad-hoc, un-orchestrated actions or write code without consulting skills.** Always invoke
    the relevant skill via `skills-orchestrator` before any response, plan, or implementation action.
 10. **Never run `git add .`, `git add -A`, or `git add -u`.** Always stage files explicitly by path (`git add path/to/file`). Run `git status` prior to commit to confirm zero data arrays, caches, or untracked outputs are staged.
+11. **Never bypass Serena.** It is mandatory to use Serena to locate functions, logic, variables, and code symbols. If it is unavailable, say so in one line and fall back to a scoped pattern search — do not spend turns installing or restarting it.
 
 ---
 
@@ -80,7 +81,7 @@ How to work unless told otherwise.
   `skills-orchestrator` to evaluate task context and declare the 1-line pre-flight tag:
   `[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <env-name>]`
   before taking action or responding.
-- **Explicit Environment execution:** Always run Python scripts, unit tests, and pipeline runners using the explicit environment (e.g. `conda run -n {{ CONDA_ENV }} python ...` or `uv run python ...`).
+- **Explicit Environment execution:** Always run Python scripts, unit tests, and pipeline runners using the explicit environment (e.g. direct interpreter path such as `C:\path\to\envs\{{ CONDA_ENV }}\python.exe script.py` or `uv run python script.py`, avoiding slow parent process wrappers).
 - **Package skills for subagents:** When dispatching subagents via `invoke_subagent`, the parent agent MUST
   explicitly bundle the required role instructions and constraints into the subagent's prompt per
   [`.agents/skills/skills-route/SKILL.md`](.agents/skills/skills-route/SKILL.md).
@@ -96,6 +97,33 @@ How to work unless told otherwise.
   **Never write one to the repository root.**
 - **Close a phase with `/project-checkpoint`**, which archives the task log into
   `docs/CHANGELOG.md` and moves the completed task markdown from `planning/tasks/` into `planning/tasks/archive/`.
+
+### Need for speed
+
+The cost of a task is the number of calls it takes, not the size of the work. Every extra call is
+another round trip, so spend a few and make each one count.
+
+- **One command per job.** A single invocation must carry the whole job — locate the thing, check
+  the imports, run it, print a summary. Never issue one command per question, and never chain
+  exploratory one-liners.
+- **Never wait out loud.** Do not answer "I am waiting for the process to complete". If a command
+  was backgrounded, do independent work in the same turn instead of yielding.
+- **Call the interpreter by path.** Use direct interpreter binary paths, not indirect runners that wrap commands in slow harness wrappers.
+- **Read through the fastest Serena tool.** `get_symbols_overview` → `find_symbol` → `read_file`;
+  use `search_for_pattern` in place of grep. Treat `find_referencing_symbols` as a deliberate
+  choice, never a first look.
+- **Never stall on tooling.** If Serena is unavailable, say so in one line and fall back to a
+  scoped pattern search. Do not spend turns installing, indexing, or restarting it.
+- **Write once.** Once a script runs and produces the artefact, stop rewriting it. Re-create it
+  only when the output is actually wrong, or the request changes.
+
+---
+
+## Tooling
+
+- **Serena** — the project is semantically indexed. Mandatory to use it to locate functions, logic, variables, and code symbols. Work fastest-first (`get_symbols_overview` → `find_symbol` → `read_file`), and use `search_for_pattern` in place of grep; see [Need for speed](#need-for-speed). If Serena is unavailable, say so in one line and fall back to a scoped pattern search — do not spend turns installing or restarting it. If you run `serena project health-check`, set `PYTHONIOENCODING=utf-8` first, or its Windows console encoding makes a passing check look like a failure. **Run `serena project index` strictly during `/project-checkpoint` milestones or when creating new packages. Never run it during iterative code edits or quick bugfixes.**
+- **Graphify** — structural knowledge graph in `graphify-out/`. Use `graphify query|path|explain`
+  to understand architecture before editing. **Run `graphify update .` strictly during `/project-checkpoint` milestones or when creating new packages. Never run it during iterative code edits or quick bugfixes.**
 
 ---
 

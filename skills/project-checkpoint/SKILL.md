@@ -59,8 +59,10 @@ When a major milestone or phase of work is completed, the codebase is often left
 - Append this summary to `docs/CHANGELOG.md` following the strict `# YYYY-MM-DD` / `## [Title]` / `### Tasks` hierarchy.
 - **Archive Task Log:** Move the completed `task_<arm>.md` file from `planning/tasks/` into `planning/tasks/archive/` so `planning/tasks/` remains clean for active work.
 
-#### 6. Knowledge Graph Regeneration (Milestone Authorized)
-- Run `graphify update .` from the root of the project to index the final structural state of the codebase. This is the designated milestone checkpoint where graphify is authorized to run.
+#### 6. Knowledge Graph & Semantic Index Regeneration (Milestone Authorized)
+- Run `graphify update .` from the root of the project to index the final structural state of the codebase.
+- Run `serena project index` from the root of the project to update Serena's semantic symbol cache.
+- These commands are authorized strictly at milestone checkpoints.
 
 #### 7. Commit and Push Session Work
 - Inspect `git status` and stage **strictly only** the files modified during the current session (referencing the task log and touched files). **NEVER run `git add .`, `git add -A`, or `git add -u` (AGENTS.md NEVER #10).** Always name files explicitly by path (`git add path/to/file`).
