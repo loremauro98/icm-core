@@ -22,6 +22,7 @@ CORE_PORTABLE_SKILLS: List[str] = [
     "lookback",
     "icm-init",
     # Engineering & Quality
+    "be-ambitious",
     "brainstorming",
     "writing-plans",
     "executing-plans",

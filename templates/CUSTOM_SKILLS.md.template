@@ -127,4 +127,6 @@ Recreating the junction after a fresh clone:
 ### 25. `datavis`
 **Location:** `.agents/skills/datavis/`  
 **Purpose:** Generates publication-quality figures, charts, and plots adhering to color, percentage, and readability standards.
-
+### 26. `be-ambitious`
+**Location:** `.agents/skills/be-ambitious/`  
+**Purpose:** Makes a task or prompt significantly more ambitious using Felix Rieseberg's dimensions of ambition: Altitude (goal beyond the goal), Depth (work like the field's top expert from raw data, checked by an outside judge), and Range (cross-disciplinary tools and actual execution).

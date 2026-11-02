@@ -30,8 +30,8 @@ flowchart TD
 ---
 
 ### Category 1: Feature Creation, Refactoring & Code Modification
-- **Trigger:** Adding new functionality, refactoring modules, modifying analytical logic, evaluating complex architectural choices, or executing long-running autonomous runs (`/goal`).
-- **Skill Stack:** [`brainstorming`](../brainstorming/SKILL.md) (± [`experts_council`](../experts_council/SKILL.md) for complex architectural/domain debate) $\rightarrow$ [`writing-plans`](../writing-plans/SKILL.md) $\rightarrow$ [`test-driven-development`](../test-driven-development/SKILL.md) $\rightarrow$ [`verification-before-completion`](../verification-before-completion/SKILL.md) (Autonomous orchestrator: [`goal`](../../goal/SKILL.md)).
+- **Trigger:** Adding new functionality, refactoring modules, modifying analytical logic, evaluating complex architectural choices, executing long-running autonomous runs (`/goal`), or elevating task ambition, depth, and range (`/be-ambitious`).
+- **Skill Stack:** [`be-ambitious`](../be-ambitious/SKILL.md) $\rightarrow$ [`brainstorming`](../brainstorming/SKILL.md) (± [`experts_council`](../experts_council/SKILL.md) for complex architectural/domain debate) $\rightarrow$ [`writing-plans`](../writing-plans/SKILL.md) $\rightarrow$ [`test-driven-development`](../test-driven-development/SKILL.md) $\rightarrow$ [`verification-before-completion`](../verification-before-completion/SKILL.md) (Autonomous orchestrator: [`goal`](../../goal/SKILL.md)).
 - **Hard Rule:** Red/green TDD is mandatory. Never write implementation code before a failing unit test exists and passes headless. For `/goal` runs, adhere to the 5 pillars of unattended execution and emit the completion token only upon full verified success.
 
 ### Category 2: Bug Investigation & Failure Diagnosis

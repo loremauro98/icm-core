@@ -36,6 +36,7 @@ except ImportError:
         "goal",
         "lookback",
         "icm-init",
+        "be-ambitious",
         "brainstorming",
         "writing-plans",
         "executing-plans",
