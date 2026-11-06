@@ -93,6 +93,16 @@ flowchart TD
 
 When the parent agent calls `invoke_subagent`, the subagent has no memory of the conversation. The parent agent **MUST** inject the relevant high-level intent bundle into the subagent's prompt:
 
+### Subagent Model Policy
+
+Subagents are cheap/flash only. Never spawn a frontier/expensive model as a subagent; if a task needs one, keep it in the main thread.
+
+- **Always pass `model` explicitly.** An omitted model inherits the session's model.
+- **Allowed class:** AA cost per task ≤ ~$1. Examples: Claude Haiku 5.5 (high), DeepSeek V4.1 Flash (high), GPT-6 Luna (max), MiMo-V2.6-Pro, GLM-5.3-Flash, Qwen3.8 Flash, MiniMax M3.1 Flash.
+- **Never as a subagent:** Kimi K3.1 Pro, Gemini 4 Argon, Claude Sonnet/Opus/Fable, GPT-6 Astra/Sol/Terra, Grok 4.7, Qwen3.8 Max, GLM-5.3, Step 5 Preview, or anything above ~$1 per AA task.
+- **Role defaults:** code edits → Claude Haiku 5.5 (high); discovery/reads/test runs → DeepSeek V4.1 Flash (high) or GPT-6 Luna (max); bulk mechanical → GPT-6 Luna (max); final whole-branch review → main thread on the planner.
+- **Turn count beats token price.** A cheap model that takes 3× the turns can cost more; use Haiku/DeepSeek as the floor for multi-step work.
+
 ### Role: Code Implementer (Category 1 & 3)
 ```markdown
 You are an Implementation Subagent. You MUST adhere to these mandatory skills:

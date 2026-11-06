@@ -24,5 +24,5 @@ uvx --from git+https://github.com/your-username/icm-core icm init
 
 ## How to use
 - Start each session by typing: "read agents.md ... task you want to tackle"
-- Example:"hei read agents.md and then look at the arm ... we need to do a control based on this document I just added in docs". The agent will proceed by reading the CONTEXT.md of the specific arm, reading the document, selecting the appropriate skill or skills to achieve the task. The first part of the output will be a short [Intent: .... | Skill Stack: ..... | Env: ....], followed by the action plan.
+- Example:"hei read agents.md and then look at the arm ... we need to do a control based on this document I just added in docs". The agent will proceed by reading the CONTEXT.md of the specific arm, reading the document, selecting the appropriate skill or skills to achieve the task. The first part of the output will be a short [Intent: .... | Skill Stack: ..... | Env: ....], followed by the Plan & Delegation block and the action plan.
 

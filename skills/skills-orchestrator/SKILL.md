@@ -22,6 +22,8 @@ This is not negotiable. You cannot rationalize your way out of this.
 **1-Line Pre-Flight Intent Declaration:** On Turn 1 of any task or query, before responding or taking action, classify the task using `skills-route` and declare:
 `[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <conda-env>]`
 
+**2. Plan & Delegation Gate:** For every task, decide the plan and the delegation in one line; emit the full block for 3+ steps or 2+ independent units. Read `references/delegation-plan.md` before dispatching any subagent. The user may set `planner=strong|standard|cheap|<model>`; never change it silently. Subagents are cheap/flash only.
+
 **Before entering plan mode:** if you haven't already brainstormed, invoke the brainstorming skill first.
 
 Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, create a todo per item.

@@ -53,9 +53,9 @@ those, stop and ask.
   superpowers:subagent-driven-development.
 
 A fully specified plan makes inline execution transcription plus testing:
-it runs well on a mid-tier session model, and the one place the most
-capable model earns its cost is the final review, which this skill
-dispatches separately. Tell your human partner so when they choose inline.
+it runs well on a mid-tier session model. The final review still runs on
+the planner model in the main thread; do not spawn a frontier subagent for
+it. Tell your human partner so when they choose inline.
 
 Prefer superpowers:subagent-driven-development when your human partner
 wants a review gate on every task, or when the plan is long enough that
@@ -237,18 +237,19 @@ Run `../subagent-driven-development/scripts/review-package PLAN_FILE MERGE_BASE 
 (MERGE_BASE = the commit the branch started from, e.g.
 `git merge-base main HEAD`) and review from the file it prints.
 
-**With a subagent tool:** dispatch the reviewer on the most capable
-available model — the whole-branch review is a judgment task — using
-superpowers:requesting-code-review's
+**With a subagent tool:** run the whole-branch review in the main thread on
+the planner model — a separate pass after the last task, reading the
+package as a reviewer rather than as the author. Do not dispatch a frontier
+model as a subagent. Use superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md), with the
 package path, the plan and spec paths, the plan's Review Focus section
 verbatim if it has one (the input classes and failure modes the plan's
 tests do not exercise — the reviewer checks each deliberately), and a
 pointer to the ledger's `Ruling:` lines so it can weigh the calls you
-made. Specify the model
-explicitly; an omitted model inherits the session's, which may not be the
-most capable. This is the one fresh context the whole run buys. Do not
-skip it, and do not replace it with your own read of the diff.
+made. A main-thread review is less fresh than a separate reviewer;
+compensate by reading the package, not by re-reading your own diff. Scoped
+re-reviews use the cheap reviewer (Haiku high). Do not skip the final
+review, and do not replace it with a casual read.
 
 **Without a subagent tool:** read code-reviewer.md and perform that review
 yourself against the package, as a separate pass after the last task's
@@ -354,7 +355,7 @@ Task 2: Recovery modes
 
 ...
 
-[After all tasks: review-package plan MERGE_BASE HEAD; dispatch code-reviewer, most capable model]
+[After all tasks: review-package plan MERGE_BASE HEAD; code-reviewer in main thread on planner model]
 Reviewer: One Important finding — progress reporting interval hardcoded. Two Minor.
 [Re-grade: Important stands; minors → ledger as deferred]
 [Fix pass: test_progress_interval_configurable RED → extract PROGRESS_INTERVAL → GREEN; suite 12/12; commit]

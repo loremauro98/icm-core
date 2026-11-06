@@ -43,4 +43,16 @@ with tempfile.TemporaryDirectory() as tmp:
     rule_file = tpath / ".agents" / "rules" / "context-health.md"
     assert rule_file.exists(), f"Rule file {rule_file} was not deployed!"
 
+    # Verify the delegation gate deployed
+    delegation = (
+        tpath
+        / ".agents"
+        / "skills"
+        / "skills-orchestrator"
+        / "references"
+        / "delegation-plan.md"
+    )
+    assert delegation.exists(), f"Delegation plan {delegation} was not deployed!"
+    assert "Plan & Delegation Gate" in (tpath / "AGENTS.md").read_text(encoding="utf-8")
+
 print("SUCCESS: Standalone package verified working in 100% isolation.")
