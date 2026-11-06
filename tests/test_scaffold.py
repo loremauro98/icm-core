@@ -53,6 +53,9 @@ with tempfile.TemporaryDirectory() as tmp:
         / "delegation-plan.md"
     )
     assert delegation.exists(), f"Delegation plan {delegation} was not deployed!"
-    assert "Plan & Delegation Gate" in (tpath / "AGENTS.md").read_text(encoding="utf-8")
+    agents_text = (tpath / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Plan & Delegation Gate" in agents_text
+    assert "Harness:" in agents_text
+    assert "plan=delegate" in agents_text
 
 print("SUCCESS: Standalone package verified working in 100% isolation.")

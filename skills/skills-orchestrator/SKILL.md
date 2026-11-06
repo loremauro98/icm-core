@@ -20,9 +20,9 @@ This is not negotiable. You cannot rationalize your way out of this.
 **Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
 
 **1-Line Pre-Flight Intent Declaration:** On Turn 1 of any task or query, before responding or taking action, classify the task using `skills-route` and declare:
-`[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <conda-env>]`
+`[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <conda-env> | Harness: <antigravity|opencode>]`
 
-**2. Plan & Delegation Gate:** For every task, decide the plan and the delegation in one line; emit the full block for 3+ steps or 2+ independent units. Read `references/delegation-plan.md` before dispatching any subagent. The user may set `planner=strong|standard|cheap|<model>`; never change it silently. Subagents are cheap/flash only.
+**2. Plan & Delegation Gate:** For every task, declare the harness (`antigravity` or `opencode`) and the plan mode: `plan=local` (default; the selected model plans) or `plan=delegate` (the selected model returns a copy-paste prompt plus the exact file paths to attach, and nothing else). Emit the full block for 3+ steps or 2+ independent units. Read `references/delegation-plan.md` before dispatching any subagent. Execution runs on the harness executor; see `references/delegation-plan.md` §3. Subagents are cheap/flash only.
 
 **Before entering plan mode:** if you haven't already brainstormed, invoke the brainstorming skill first.
 

@@ -53,8 +53,8 @@ those, stop and ask.
   superpowers:subagent-driven-development.
 
 A fully specified plan makes inline execution transcription plus testing:
-it runs well on a mid-tier session model. The final review still runs on
-the planner model in the main thread; do not spawn a frontier subagent for
+it runs well on the selected session model. The final review still runs on
+the selected model in the main thread; do not spawn a frontier subagent for
 it. Tell your human partner so when they choose inline.
 
 Prefer superpowers:subagent-driven-development when your human partner
@@ -238,7 +238,7 @@ Run `../subagent-driven-development/scripts/review-package PLAN_FILE MERGE_BASE 
 `git merge-base main HEAD`) and review from the file it prints.
 
 **With a subagent tool:** run the whole-branch review in the main thread on
-the planner model — a separate pass after the last task, reading the
+the selected model — a separate pass after the last task, reading the
 package as a reviewer rather than as the author. Do not dispatch a frontier
 model as a subagent. Use superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md), with the
@@ -248,7 +248,7 @@ tests do not exercise — the reviewer checks each deliberately), and a
 pointer to the ledger's `Ruling:` lines so it can weigh the calls you
 made. A main-thread review is less fresh than a separate reviewer;
 compensate by reading the package, not by re-reading your own diff. Scoped
-re-reviews use the cheap reviewer (Haiku high). Do not skip the final
+re-reviews use the harness executor. Do not skip the final
 review, and do not replace it with a casual read.
 
 **Without a subagent tool:** read code-reviewer.md and perform that review
@@ -355,7 +355,7 @@ Task 2: Recovery modes
 
 ...
 
-[After all tasks: review-package plan MERGE_BASE HEAD; code-reviewer in main thread on planner model]
+[After all tasks: review-package plan MERGE_BASE HEAD; code-reviewer in main thread on selected model]
 Reviewer: One Important finding — progress reporting interval hardcoded. Two Minor.
 [Re-grade: Important stands; minors → ledger as deferred]
 [Fix pass: test_progress_interval_configurable RED → extract PROGRESS_INTERVAL → GREEN; suite 12/12; commit]

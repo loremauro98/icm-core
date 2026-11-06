@@ -1,65 +1,58 @@
 ---
 name: prompter
-description: Spawns a subagent that gathers context via Serena, Graphify, and local CONTEXT.md files to generate a structured prompt for outsourcing complex planning or scientific problems to external LLMs or human experts.
+description: Builds an external-planner request — one copy-paste prompt plus the exact file paths to attach — for outsourcing planning to an external LLM or human expert.
 ---
 
-# `prompter` - Planning Outsourcing Prompt Generator
+# `prompter` — External Planning Prompt Generator
 
-When this skill is invoked (via `/prompter`, "use prompter", "outsource planning for...", "generate external prompt", or when asked to prepare a prompt for an external LLM/colleague), execute the following workflow to construct a comprehensive, self-contained prompt.
+Invoked via `/prompter`, "use prompter", "outsource planning for...", "delegate planning", or when the Plan & Delegation Gate selects `plan=delegate`.
+
+The output lives in the chat. Do not write a prompt document, a context folder, or any other artifact.
 
 ---
 
-## Workflow Instructions
+## Workflow
 
-### 1. Receive & Clarify Problem
-Identify the problem or analytical feature specified by the user. If the problem statement lacks essential detail, ask brief clarifying questions before gathering context.
+### 1. Receive & clarify
 
-### 2. Define & Invoke Context-Gathering Subagent
-Spawn a context-gathering subagent using `define_subagent` (or invoke a `research` / `self` subagent) named `prompter_context_gatherer`.
+Identify the problem. If the statement lacks essential detail, ask brief clarifying questions before gathering context.
 
-**Subagent Configuration:**
-- **name**: `prompter_context_gatherer`
-- **description**: `Context researcher that maps code structures, graphify relationships, and CONTEXT.md files for outsourcing prompts`
-- **system_prompt**:
+### 2. Gather context
+
+Spawn a read-only context subagent with the harness's native subagent tool. Name it `prompter_context_gatherer` and give it this protocol:
+
 ```text
-You are a context extraction specialist for the active avoidance neuroscience pipeline.
-Your task is to gather complete, precise context for a given analytical or coding problem so it can be cleanly outsourced to an external LLM or human expert.
+You are a context extraction specialist for the project.
+Gather complete, precise context for a given analytical or coding problem so it can be outsourced to an external LLM or human expert.
 
-INSPECTION PROTOCOL:
-1. Serena & Code Search: Locate exact functions, data structures, variables, and module boundaries related to the problem.
-2. Graphify Knowledge Graph: Run `graphify query "<problem keywords>"`, `graphify path`, and `graphify explain` to map architectural dependencies and affected modules.
-3. Local Context Files: Read `CONTEXT.md` files in relevant directories (`/src`, `/planning`, `/data`, `/ops`), along with `AGENTS.md` and any relevant `math_spec.md` or `REFERENCES.md`.
-4. Domain Constraints: Extract key parameters (e.g. frame rates, sampling rates, normalization rules, cell count constraints, shuffle numbers).
+1. Serena & code search: locate exact functions, data structures, variables, and module boundaries.
+2. Graphify: run `graphify query "<problem keywords>"`, `graphify path`, and `graphify explain` to map dependencies.
+3. Local context: read `CONTEXT.md` files in the relevant directories, `AGENTS.md`, and any relevant `math_spec.md` or `REFERENCES.md`.
+4. Domain constraints: extract key parameters (frame rates, sampling rates, normalization rules, cell counts, shuffle numbers).
 
-Return a clear, structured summary of your findings covering code references, equations, input/output schemas, and project rules.
+Return a structured summary of code references, equations, input/output schemas, and project rules. Also return the exact file paths the external worker needs, ranked by importance.
 ```
 
-Instruct the subagent with the user's target problem statement.
+### 3. Write the prompt
 
-### 3. Synthesize the Outsourcing Prompt
-Using the research findings returned by the subagent, draft a standalone, copy-pasteable Markdown prompt containing the following **4 mandatory sections**:
+Draft a standalone, copy-pasteable Markdown prompt with four sections:
 
-#### Section 1: Persona / Role (`Who the LLM/Expert is`)
-Define a precise expert persona tailored to the domain.
-- *Examples*:
-  - `"You are an expert computational neuroscientist and statistician with deep experience in 1P calcium imaging, hippocampal CA3 spatial representations, and non-parametric bootstrap resampling."`
-  - `"You are a senior python software architect specializing in vectorized numpy/scipy operations and high-throughput analytical pipelines."`
+1. **Role** — the expert persona.
+2. **Problem** — a clear statement, goals, edge cases, known failure modes.
+3. **Context** — a compact summary of the gathered facts and the exact attached file paths; tell the worker to read the attachments first.
+4. **Expected output** — the answer contract below.
 
-#### Section 2: Problem Statement (`What the problem is`)
-A clear, unambiguous statement of the problem to solve, including goals, edge cases, and known failure modes.
+The answer contract is mandatory. The prompt must require:
 
-#### Section 3: Technical & Scientific Context (`The Context`)
-Complete background context assembled from the codebase:
-- Relevant source files, functions, and data structures (with links/paths)
-- Mathematical rules, equations, normalization methods, and sampling rates
-- Project rules from `AGENTS.md` (e.g., percentages over raw counts, speed vs rigor, transparent data masking)
+- a concise answer, in the form of a single copy-paste prompt;
+- no verbose explanation of what or why outside that prompt;
+- a final `Expected outputs` section listing the artifacts the local run will fill and the user will paste back.
 
-#### Section 4: Expected Output (`The Expected Output`)
-Specify exactly what the external LLM or human expert must produce:
-- A step-by-step implementation plan or mathematical specification
-- Recommended function signatures, data structures, and null-distribution definitions
-- Strategy for edge-case handling and computational optimization
-- Designed so Lorenzo or an agent can directly re-ingest the response back into the active pipeline context.
+### 4. Output in the chat
 
-### 4. Output the Prompt Artifact
-Save the formatted prompt to an artifact file (e.g., `outsourced_prompt.md` or `prompter_<problem_slug>.md`) in the artifacts directory and present it cleanly to the user.
+Reply with exactly two things and nothing else:
+
+1. the prompt in one fenced block;
+2. an `Attach:` list of the exact file paths.
+
+No preamble, no explanation of the prompt, no saved file.

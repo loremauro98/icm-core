@@ -72,7 +72,7 @@ digraph process {
         "Spec ✅ and quality approved?" [shape=diamond];
         "Finding conflicts with plan text?" [shape=diamond];
         "Rule on the conflict, ledger the ruling" [shape=box];
-        "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, one cheap tier up" [shape=box];
+        "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more context" [shape=box];
         "Dispatch scoped re-review (./re-review-prompt.md)" [shape=box];
         "All findings addressed?" [shape=diamond];
         "R = 5?" [shape=diamond];
@@ -100,13 +100,13 @@ digraph process {
     "Spec ✅ and quality approved?" -> "Append completion to ledger, mark todo complete" [label="yes"];
     "Spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
     "Finding conflicts with plan text?" -> "Rule on the conflict, ledger the ruling" [label="yes"];
-    "Rule on the conflict, ledger the ruling" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, one cheap tier up";
-    "Finding conflicts with plan text?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, one cheap tier up" [label="no"];
-    "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, one cheap tier up" -> "Dispatch scoped re-review (./re-review-prompt.md)";
+    "Rule on the conflict, ledger the ruling" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more context";
+    "Finding conflicts with plan text?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more context" [label="no"];
+    "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more context" -> "Dispatch scoped re-review (./re-review-prompt.md)";
     "Dispatch scoped re-review (./re-review-prompt.md)" -> "All findings addressed?";
     "All findings addressed?" -> "Append completion to ledger, mark todo complete" [label="yes"];
     "All findings addressed?" -> "R = 5?" [label="no"];
-    "R = 5?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, one cheap tier up" [label="no - next round"];
+    "R = 5?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more context" [label="no - next round"];
     "R = 5?" -> "Adjudicate each open finding" [label="yes - breaker trips"];
     "Adjudicate each open finding" -> "Any load-bearing finding?";
     "Any load-bearing finding?" -> "Rule and continue; stop only if every path forward is a guess" [label="yes"];
@@ -183,41 +183,41 @@ implementation.
 
 ## Model Selection
 
-Use the least powerful model that can handle each role to conserve cost and increase speed.
+The executor is fixed per harness: see `../skills-orchestrator/references/delegation-plan.md` §3. Do not pick a different model per task.
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
+**Delegate to the executor** when the task is mechanical and the brief carries the design:
 
-**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
+- isolated functions, clear specs, 1-2 files;
+- complete code in the plan (transcription plus testing);
+- single-file mechanical fixes.
 
-**Architecture and design tasks**: keep them in the main thread on the
-planner model. The final whole-branch review is one of these — run it in
-the main thread, not as a subagent.
+**Keep in the main thread on the selected model** when the task needs judgment:
 
-**Review tasks**: choose the model with the same judgment, scaled to the
-diff's size, complexity, and risk. A small mechanical diff does not need the
-most capable model; a subtle concurrency change does — run that review in the
-main thread. Scoped re-reviews of small fix diffs take a cheap-to-mid tier.
+- multi-file coordination or integration;
+- architecture and design;
+- broad codebase understanding;
+- the final whole-branch review;
+- a fix loop that survives more context.
 
-**Fix-loop escalation (rounds 4-5)**: use one cheap tier above the
-implementer that got stuck (e.g. Luna → DeepSeek → Haiku); never a
-frontier model.
+**Review tasks** use the same executor for scoped re-reviews. A subtle or high-risk diff stays in the main thread.
+
+**Fix-loop escalation (rounds 4-5)**: give the fresh implementer more
+context; if it still fails, pull the task into the main thread on the
+selected model. Never spawn a frontier model as a subagent.
 
 **Always specify the model explicitly when dispatching a subagent.** An
 omitted model inherits your session's model — which may be a frontier
 model — silently defeating the cheap-subagent rule.
 
 **Turn count beats token price.** Wall-clock and context cost scale with how
-many turns a subagent takes, and the cheapest models routinely take 2-3× the
-turns on multi-step work — costing more overall. Use a mid-tier model as the
-floor for reviewers and for implementers working from prose descriptions.
-When the task's plan text contains the complete code to write, the
-implementation is transcription plus testing: use the cheapest tier for
-that implementer. Single-file mechanical fixes also take the cheapest tier.
+many turns a subagent takes, and a cheap model can take 2-3× the turns on
+multi-step work. Give the executor a complete, specific brief; if the brief
+is prose-only and the task is multi-step, keep it in the main thread.
 
 **Task complexity signals (implementation tasks):**
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → keep in the main thread on the planner; do not delegate
+- Touches 1-2 files with a complete spec → executor subagent
+- Touches multiple files with integration concerns → main thread or a tightly scoped executor task
+- Requires design judgment or broad codebase understanding → main thread on the selected model; do not delegate
 
 ## The Task Loop
 
@@ -296,7 +296,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
 1. If it's a context problem, provide more context and re-dispatch with the same model
-2. If the task requires more reasoning, re-dispatch with one cheap tier up (e.g. Luna → DeepSeek → Haiku)
+2. If the task requires more reasoning, pull it into the main thread on the selected model
 3. If the task is too large, break it into smaller pieces
 4. If the plan itself is wrong, rule on the correction, ledger it, and re-dispatch with the ruling carried in the dispatch
 
@@ -379,7 +379,7 @@ choices. If your harness cannot send another message to a live subagent,
 dispatch a fresh implementer carrying the brief path, the report-file path,
 and the findings — the report file is the persistent memory either way.
 
-**Rounds 4-5 — dispatch a fresh implementer one cheap tier up** (per
+**Rounds 4-5 — dispatch a fresh implementer with more context** (per
 Model Selection; never a frontier model), with the brief path, the report-file path, the open
 findings, and this framing: "A prior implementer attempted this task
 [N] times; you own it now. Read the report file for what was tried." A loop
@@ -450,7 +450,7 @@ The final whole-branch review gets a package too: run
 branch started from, e.g. `git merge-base main HEAD`) and include the
 printed path in the final review dispatch, so the final reviewer reads
 one file instead of re-deriving the branch diff with git commands. Run the
-review in the main thread on the planner model (see Model Selection); do
+review in the main thread on the selected model (see Model Selection); do
 not dispatch it as a subagent. Use
 superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md). Point it at
@@ -561,7 +561,7 @@ Re-reviewer: Missing progress reporting — ADDRESSED (src/recovery.js:41).
 ...
 
 [After all tasks]
-[Run review-package PLAN_FILE MERGE_BASE HEAD; final code-reviewer in main thread on planner model]
+[Run review-package PLAN_FILE MERGE_BASE HEAD; final code-reviewer in main thread on selected model]
 Final reviewer: All requirements met. Deferred minors triaged: none block merge.
 
 [Delete this plan's workspace — the record now lives in git]

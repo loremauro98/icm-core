@@ -1,48 +1,78 @@
 # `delegation-plan` — Plan & Delegation Gate
 
 > Consulted by `skills-orchestrator` immediately after the pre-flight tag, and by every agent before dispatching a subagent.
-> Authority for the planner tier and the subagent model policy.
+> Authority for the harness declaration, the plan mode, and the executor model per harness.
 
 ## The gate
 
 Every task gets a one-line decision. A non-trivial task (3+ steps, or 2+ independent work units) gets the full block:
 
 ```text
-[Plan: <n> steps | Planner: <tier> (<model>) | Delegation: none|parallel|pipeline|fan-out-fan-in | Subagents: <role×n> (<model>) | Verify: <command/test>]
+[Plan: <n> steps | Harness: antigravity|opencode | Plan: local|delegate (<model>) | Executors: <model> | Delegation: none|parallel|pipeline|fan-out-fan-in | Verify: <command/test>]
 ```
 
 Then 3-6 numbered steps, each with an owner (`main` or the subagent role) and a concrete output.
 
 Trivial (≤2 steps, one file, no independent unit) → skip the block; do the work.
 
-## Planner tier
+## 1. Harness
 
-The user sets it inline: `planner=strong|standard|cheap|<provider/model>`.
+Declared in the pre-flight tag and never assumed:
 
-| Tier | Example (OpenCode Go, 2026) | Use for |
+```text
+[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <conda-env> | Harness: antigravity|opencode]
+```
+
+The harness decides the executor model. If it cannot be told, ask one line and stop.
+
+## 2. Plan mode
+
+The user sets it inline: `plan=local|delegate`. Default `local`.
+
+| Mode | Who plans | Output |
 |---|---|---|
-| `strong` | Kimi K3.1 Pro | architecture, hard debugging, science/terminal-heavy runs |
-| `standard` | Claude Haiku 5.5 (max) | routine code changes, tests, reviews, mixed work |
-| `cheap` | DeepSeek V4.1 Flash (max) or GPT-6 Luna (max) | small edits, lookups, mechanical work |
-| `<model>` | exactly what the user named | overrides the tier |
+| `local` | the model already selected in this harness | the plan, in the main thread |
+| `delegate` | an external worker (Argon in Antigravity or the Gemini app) | a copy-paste prompt plus the exact file paths to attach; nothing else |
 
-Projects on other providers map the same three tiers to their own models.
+- The local selected model drafts the delegate prompt. Planning is never delegated to a subagent.
+- In `local`, never swap the selected model silently.
+- In `delegate`, the local thread still owns acceptance: it checks the returned plan against the repo before any subagent runs.
 
-- If the token is omitted, the current session model plans and is named in the block.
-- Never upgrade or downgrade the planner silently. State it, then use it.
-- The planner runs in the main thread. Planning is never delegated to a subagent.
+### Delegate output
 
-Evidence from AA Intelligence Index v5.0.1: Kimi K3.1 Pro is #1 on Terminal-Bench 4.0 (67.2%) and the best Go model on Terminal-Bench-Science (34.3%); Claude Haiku 5.5 (max) is the best Go model on FrontierCode 2.0 (34.9%).
+In `delegate`, the answer in the chat is exactly two things:
 
-## Subagent model policy
+1. one copy-paste prompt for the external worker;
+2. the exact file paths to attach alongside it.
 
-**Subagents are cheap/flash only.** If a task needs a frontier model, it stays in the main thread.
+No plan, no context folder, no ad hoc documents.
 
-- **Always pass `model` explicitly.** An omitted model inherits the session's model.
-- **Allowed class:** AA cost per task ≤ ~$1. Examples: Claude Haiku 5.5 (high), DeepSeek V4.1 Flash (high), GPT-6 Luna (max), MiMo-V2.6-Pro, GLM-5.3-Flash, Qwen3.8 Flash, MiniMax M3.1 Flash.
-- **Never as a subagent:** Kimi K3.1 Pro, Gemini 4 Argon, Claude Sonnet/Opus/Fable, GPT-6 Astra/Sol/Terra, Grok 4.7, Qwen3.8 Max, GLM-5.3, Step 5 Preview, or anything above ~$1 per AA task.
-- **Role defaults:** code edits → Claude Haiku 5.5 (high); discovery/reads/test runs → DeepSeek V4.1 Flash (high) or GPT-6 Luna (max); bulk mechanical → GPT-6 Luna (max); final whole-branch review → main thread on the planner.
-- **Turn count beats token price.** A cheap model that takes 3× the turns can cost more; use Haiku/DeepSeek as the floor for multi-step work.
+The prompt must require the external worker to answer with:
+
+- **a concise answer**, in the form of a single copy-paste prompt;
+- **no verbose explanation** of what or why outside that prompt;
+- **a final `Expected outputs` list** that the local run fills and the user pastes back.
+
+### Return loop
+
+1. The user pastes the external answer back.
+2. The local thread checks every path, symbol, and parameter against the repo; reject or fix before dispatch.
+3. Execute with local subagents.
+4. Collect the expected outputs and present them for the user to paste back.
+
+## 3. Executors
+
+Subagents are cheap/flash only and always receive an explicit `model`.
+
+| Harness | Executor |
+|---|---|
+| Antigravity | Gemini 3.8 Flash |
+| OpenCode | DeepSeek V4.1 Flash |
+
+- The executor is fixed per harness; the user does not pick it per task.
+- Frontier models are never subagents. If a task needs one, it stays in the main thread on the selected model.
+- The final whole-branch review runs in the main thread on the selected model.
+- Turn count beats token price. A cheap model that takes 3× the turns can cost more.
 
 ## Delegation patterns
 
@@ -70,33 +100,33 @@ Every plan ends with `Verify:` — a command, test, or artifact. Work is not don
 
 ## Examples
 
-Standard, one cheap subagent:
+Local planning, one cheap subagent:
 
 ```text
-[Plan: 3 steps | Planner: standard (Claude Haiku 5.5 max) | Delegation: pipeline 1 → 1 | Subagents: explorer×1 (DeepSeek high) | Verify: pytest tests/test_spatial_bins.py]
-1. Explorer: locate the polar-bin authority and its consumers (DeepSeek high, read-only)
+[Plan: 3 steps | Harness: opencode | Plan: local (selected) | Executors: DeepSeek V4.1 Flash | Delegation: pipeline 1 → 1 | Verify: pytest tests/test_spatial_bins.py]
+1. Explorer: locate the polar-bin authority and its consumers (DeepSeek Flash, read-only)
 2. Main: patch the bin geometry + add the failing test
 3. Main: run pytest and report
 ```
 
-Large, fan-out with approval:
+Delegated planning, fan-out context:
 
 ```text
-[Plan: 5 steps | Planner: strong (Kimi K3.1 Pro) | Delegation: fan-out 3 → merge | Subagents: explorer×2 (DeepSeek high), test×1 (Haiku high) | Verify: pytest tests/ -k "manifold or glm"]
-1. Explorers: map the three pipeline entry points (parallel, read-only)
-2. Main: choose the change and the test
-3. Test subagent: write the failing test (Haiku high)
-4. Main: implement, run, and fix
-5. Main: full verify + outcome-first report
+[Plan: 3 steps | Harness: opencode | Plan: delegate → Argon | Executors: DeepSeek V4.1 Flash | Delegation: context×2 | Verify: pytest tests/test_spatial_bins.py]
+1. Context subagents: map the bin authority and its consumers (read-only)
+2. Main: return the copy-paste prompt + the file list
+3. (after return) Main: validate against the repo, dispatch, collect the expected outputs
 ```
 
 ## Anti-patterns
 
 | Thought | Reality |
 |---|---|
+| "The harness can be inferred" | Declare it in the pre-flight tag. The executor depends on it. |
 | "Two subagents will make this faster" | Only if the units are independent. Otherwise they collide. |
 | "The planner is a subagent" | Planning stays in the main thread. |
-| "Kimi is cheap enough for a subagent" | It is not. Haiku may be; check the class rule. |
+| "Delegate can write a context folder" | No. Prompt plus file paths in the chat, nothing else. |
+| "The external plan runs as-is" | Validate every path and symbol against the repo first. |
 | "I'll omit `model` and let it inherit" | It inherits the session model — the exact thing this gate prevents. |
-| "The final review can be a frontier subagent" | Final review runs in the main thread on the planner. |
+| "The final review can be a frontier subagent" | Final review runs in the main thread on the selected model. |
 | "I'll spawn first, plan after" | Plan and delegation are decided before the first spawn. |

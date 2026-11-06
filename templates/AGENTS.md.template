@@ -79,13 +79,13 @@ How to work unless told otherwise.
 
 - **Start every session with `skills-orchestrator`:** Immediately after reading `AGENTS.md` on turn 1, invoke
   `skills-orchestrator` to evaluate task context and declare the 1-line pre-flight tag:
-  `[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <env-name>]`
+  `[Intent: <Category 1-7> | Skill Stack: <skills> | Env: <env-name> | Harness: <antigravity|opencode>]`
   before taking action or responding.
 - **Explicit Environment execution:** Always run Python scripts, unit tests, and pipeline runners using the explicit environment (e.g. direct interpreter path such as `C:\path\to\envs\{{ CONDA_ENV }}\python.exe script.py` or `uv run python script.py`, avoiding slow parent process wrappers).
 - **Package skills for subagents:** When dispatching subagents via `invoke_subagent`, the parent agent MUST
   explicitly bundle the required role instructions and constraints into the subagent's prompt per
   [`.agents/skills/skills-route/SKILL.md`](.agents/skills/skills-route/SKILL.md).
-- **Plan & Delegation Gate:** After the pre-flight tag, every task gets a one-line plan/delegation decision; 3+ steps or 2+ independent units get the full block. Accept `planner=strong|standard|cheap|<model>` and never change it silently. Subagents are cheap/flash only and always get an explicit `model`. See [`.agents/skills/skills-orchestrator/references/delegation-plan.md`](.agents/skills/skills-orchestrator/references/delegation-plan.md).
+- **Plan & Delegation Gate:** After the pre-flight tag, every task gets a one-line plan/delegation decision; 3+ steps or 2+ independent units get the full block. Declare the harness, then `plan=local` (default: the selected model plans) or `plan=delegate` (the selected model returns a copy-paste prompt plus the exact file paths to attach; nothing else). Executors are fixed per harness; see [`.agents/skills/skills-orchestrator/references/delegation-plan.md`](.agents/skills/skills-orchestrator/references/delegation-plan.md) §3.
 - **Use simple language. Keep output short.** Explain in plain words, step by step, and write as
   little as possible to make the point. Do not use technical vocabulary unless asked. NO
   STREAM OF CONSCIOUSNESS. GIVE OUTPUT STRICTLY ONLY WHEN A DECISION IS NEEDED OR THERE IS A 

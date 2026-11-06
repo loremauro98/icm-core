@@ -77,7 +77,7 @@ Autonomous harness runners scan agent output for explicit completion tokens:
 
 Any model running in goal mode should execute this standard checklist:
 
-1. [ ] **Intent Declaration:** Classify intent and state pre-flight tag (`[Intent: ... | Skill Stack: ... | Env: ...]`).
+1. [ ] **Intent Declaration:** Classify intent and state pre-flight tag (`[Intent: ... | Skill Stack: ... | Env: ... | Harness: antigravity|opencode]`).
 2. [ ] **Task Decomposition:** Create or update `planning/tasks/task_<arm>.md`.
 3. [ ] **Autonomous Execution:** Execute code modifications, test creation, or analytical pipelines.
 4. [ ] **Headless Verification:** Run automated tests and pipeline smoke checks to confirm exit code 0.

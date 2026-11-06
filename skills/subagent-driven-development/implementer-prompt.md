@@ -86,8 +86,8 @@ Subagent (general-purpose):
 
     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
     specifically what you're stuck on, what you've tried, and what kind of help you need.
-    The controller can provide more context, re-dispatch with one cheap tier up
-    (e.g. Luna → DeepSeek → Haiku), or break the task into smaller pieces.
+    The controller can provide more context, break the task into smaller pieces,
+    or pull it into the main thread on the selected model.
 
     ## Before Reporting Back: Self-Review
 
